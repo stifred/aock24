@@ -4,22 +4,18 @@ import com.github.stifred.aoc24.shared.solution
 import kotlin.math.abs
 
 val second = solution(2) {
-  val reports = parseInput { it.lines().map(::Report) }
-
-  part1 {
-    reports.count { it.isSafe() }
+  val reports = parseInput { raw ->
+    raw.lines()
+      .map { line -> line.split(' ').map(String::toInt) }
+      .map { Report(it) }
   }
 
-  part2 {
-    reports.count { it.isMaybeSafe() }
-  }
+  part1 { reports.count(Report::isSafe) }
+  part2 { reports.count(Report::isSafeWithDampener) }
 }
 
-data class Report(val text: String) {
-  fun isSafe() = text.split(' ').asSequence()
-    .map { it.toInt() }
-    .windowed(3)
-    .all { (a, b, c) ->
+data class Report(val values: List<Int>) {
+  val isSafe get() = values.windowed(3).all { (a, b, c) ->
       when {
         a - b == 0 -> false
         b - c == 0 -> false
@@ -29,50 +25,9 @@ data class Report(val text: String) {
         else -> true
       }
     }
-
-  fun isMaybeSafe(): Boolean {
-    if (isSafe()) return true
-
-    val words = text.split(' ')
-
-    for (i in words.indices) {
-      if (unsafeLevel(words.filterIndexed { index, _ -> index != i }) == null) {
-        return true
-      }
-    }
-
-    return false
-  }
-
-  companion object {
-    private fun unsafeLevel(levels: List<String>): Int? {
-      var last: Int? = null
-      var descending: Boolean? = null
-
-      for (levelIndex in levels.indices) {
-        val level = levels[levelIndex]
-
-        val num = level.toInt()
-        if (last == null) {
-          last = num
-          continue
-        }
-
-        val diff = num - last
-        if (diff == 0 || abs(diff) > 3) {
-          return levelIndex
-        }
-
-        if (descending == null) {
-          descending = diff < 0
-        } else if (descending != diff < 0) {
-          return levelIndex
-        }
-
-        last = num
-      }
-
-      return null
-    }
-  }
+  val isSafeWithDampener get(): Boolean =
+    isSafe
+      || values.indices.asSequence()
+        .map { Report(values.filterIndexed { index, _ -> index != it }) }
+        .any { it.isSafe }
 }
