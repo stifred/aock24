@@ -10,8 +10,8 @@ class SecondTest {
   private val solution = second.apply { run() }
 
   @Test
-  fun `test of part 1`() = assertEquals(TODO(), solution.last1)
+  fun `test of part 1`() = assertEquals(2, solution.last1)
 
   @Test
-  fun `test of part 2`() = assertEquals(TODO(), solution.last2)
+  fun `test of part 2`() = assertEquals(4, solution.last2)
 }

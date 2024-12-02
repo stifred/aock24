@@ -3,10 +3,8 @@ package com.github.stifred.aoc24.first
 import com.github.stifred.aoc24.shared.solution
 import kotlin.math.abs
 
-val first = solution {
+val first = solution(1) {
   data class Input(val left: List<Int>, val right: List<Int>)
-
-  day = 1
 
   val input = parseInput { raw ->
     val left = mutableListOf<Int>()

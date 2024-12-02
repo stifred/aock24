@@ -3,15 +3,14 @@ package com.github.stifred.aoc24.shared
 import java.time.Duration
 import java.time.Instant
 
-fun solution(func: SolutionDsl.() -> Unit): Solution {
-  val sol = SolutionDsl()
+fun solution(day: Int, func: SolutionDsl.() -> Unit): Solution {
+  val sol = SolutionDsl(day)
   sol.runner = func
 
-  return Solution(sol)
+  return Solution(day, sol)
 }
 
-class Solution(private val dsl: SolutionDsl) {
-  val day get() = dsl.day
+class Solution(val day: Int, private val dsl: SolutionDsl) {
   val last1 get() = dsl.lastPart1
   val last2 get() = dsl.lastPart2
 
@@ -20,10 +19,8 @@ class Solution(private val dsl: SolutionDsl) {
   }
 }
 
-class SolutionDsl {
+class SolutionDsl(private val day: Int) {
   lateinit var runner: SolutionDsl.() -> Unit
-
-  var day = 1
 
   lateinit var lastPart1: Any
   lateinit var lastPart2: Any
