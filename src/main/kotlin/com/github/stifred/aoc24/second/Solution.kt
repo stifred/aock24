@@ -31,10 +31,17 @@ data class Report(val text: String) {
     }
 
   fun isMaybeSafe(): Boolean {
+    if (isSafe()) return true
+
     val words = text.split(' ')
 
-    val unsafe = unsafeLevel(words) ?: return true
-    return unsafeLevel(words.filterIndexed { index, _ -> index != unsafe }) == null
+    for (i in words.indices) {
+      if (unsafeLevel(words.filterIndexed { index, _ -> index != i }) == null) {
+        return true
+      }
+    }
+
+    return false
   }
 
   companion object {
@@ -53,21 +60,18 @@ data class Report(val text: String) {
 
         val diff = num - last
         if (diff == 0 || abs(diff) > 3) {
-          println("${levels.joinToString(" ")} == unsafe")
           return levelIndex
         }
 
         if (descending == null) {
           descending = diff < 0
         } else if (descending != diff < 0) {
-          println("${levels.joinToString(" ")} == unsafe")
           return levelIndex
         }
 
         last = num
       }
 
-      println("${levels.joinToString(" ")} == safe")
       return null
     }
   }
