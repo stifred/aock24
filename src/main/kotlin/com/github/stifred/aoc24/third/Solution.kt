@@ -20,22 +20,15 @@ val third = solution(3) {
   }
 
   part1 {
-    functions
+    functions.asSequence()
       .map { it.run() }
       .filterIsInstance<FunctionResult.Number>()
       .sumOf { it.value }
   }
 
   part2 {
-    data class Status(val sum: Int = 0, val enabled: Boolean = true) {
-      fun with(func: Function) = when (val res = func.run()) {
-        is FunctionResult.Number -> if (this.enabled) copy(sum = this.sum + res.value) else this
-        is FunctionResult.EnabledStatus -> copy(enabled = res.status)
-      }
-    }
-
     functions
-      .fold(Status()) { acc, func -> acc.with(func) }
+      .fold(Accumulator()) { status, func -> status with func }
       .sum
   }
 }
@@ -52,4 +45,11 @@ data class Function(val name: String, val values: List<Int>) {
 sealed class FunctionResult {
   data class Number(val value: Int) : FunctionResult()
   data class EnabledStatus(val status: Boolean) : FunctionResult()
+}
+
+data class Accumulator(val sum: Int = 0, val enabled: Boolean = true) {
+  infix fun with(func: Function) = when (val res = func.run()) {
+    is FunctionResult.Number -> if (this.enabled) copy(sum = this.sum + res.value) else this
+    is FunctionResult.EnabledStatus -> copy(enabled = res.status)
+  }
 }
