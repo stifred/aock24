@@ -22,26 +22,18 @@ val first = solution(1) {
     val sortedLeft = input.left.sorted()
     val sortedRight = input.right.sorted()
 
-    var sum = 0
-    for (i in sortedLeft.indices) {
-      sum += abs(sortedLeft[i] - sortedRight[i])
-    }
-
-    sum
+    sortedLeft.indices.sumOf { abs(sortedLeft[it] - sortedRight[it]) }
   }
 
   part2 {
-    val rightCounts = mutableMapOf<Int, Int>()
-    for (num in input.right) {
-      rightCounts.merge(num, 1) { a, b -> a + b }
-    }
+    val rightCounts = input.right
+      .groupBy { it }
+      .map { it.key to it.value.size }
+      .toMap()
 
-    var sum = 0
-    for (num in input.left) {
-      sum += num * (rightCounts[num] ?: 0)
-    }
-
-    sum
+    input.left.asSequence()
+      .filter { rightCounts.containsKey(it) }
+      .sumOf { it * rightCounts[it]!! }
   }
 }
 

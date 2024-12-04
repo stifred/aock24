@@ -4,19 +4,11 @@ import com.github.stifred.aoc24.shared.solution
 
 val third = solution(3) {
   val functions = parseInput { raw ->
-    val regex = Regex("((mul)\\(([0-9]+),([0-9]+)\\)|(don't|do)\\(\\))")
-
-    buildList {
-      for (match in regex.findAll(raw)) {
-        val nonEmpty = match.groupValues.filter { it.isNotBlank() && !it.contains("(") }
-        add(
-          Function(
-            name = nonEmpty[0],
-            values = nonEmpty.drop(1).map { it.toInt() },
-          )
-        )
-      }
-    }
+    Regex("((mul)\\(([0-9]+),([0-9]+)\\)|(don't|do)\\(\\))")
+      .findAll(raw)
+      .map { it.groupValues.filter(String::isFunctionNameOrNumber) }
+      .map { Function(name = it[0], values = it.drop(1).map(String::toInt)) }
+      .toList()
   }
 
   part1 {
@@ -53,3 +45,5 @@ data class Accumulator(val sum: Int = 0, val enabled: Boolean = true) {
     is FunctionResult.EnabledStatus -> copy(enabled = res.status)
   }
 }
+
+private fun String.isFunctionNameOrNumber() = isNotBlank() && !contains("(")
