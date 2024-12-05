@@ -4,15 +4,10 @@ import com.github.stifred.aoc24.shared.solution
 
 val fourth = solution(day = 4) {
   val lh = parseInput { raw ->
-    LetterHolder(
-      buildMap {
-        raw.lines().forEachIndexed { y, line ->
-          line.forEachIndexed { x, char ->
-            put(Position(x, y), char)
-          }
-        }
-      },
-    )
+    val lines = raw.lines()
+    val array = Array(lines.size) { lines[it].toCharArray() }
+
+    LetterHolder(array)
   }
 
   part1 { lh.findWord("XMAS").count() }
@@ -25,16 +20,16 @@ val fourth = solution(day = 4) {
   }
 }
 
-class LetterHolder(private val map: Map<Position, Char>) {
-  val width = map.keys.maxOf { it.x } + 1
-  val height = map.keys.maxOf { it.y } + 1
+class LetterHolder(private val map: Array<CharArray>) {
+  val width = map[0].size
+  val height = map.size
 
   fun findWord(
     word: String,
     directions: Collection<Direction> = Direction.entries,
   ): List<Pair<Position, Direction>> {
     return buildList {
-      for ((pos, char) in map) {
+      for ((pos, char) in map.iterate()) {
         if (char == word[0]) {
           for (dir in directions) {
             var score = 1
@@ -49,6 +44,23 @@ class LetterHolder(private val map: Map<Position, Char>) {
             if (score == word.length) {
               add(pos to dir)
             }
+          }
+        }
+      }
+    }
+  }
+
+  companion object {
+    operator fun Array<CharArray>.get(position: Position) = this[position.y][position.x]
+
+    private fun Array<CharArray>.iterate(): Iterator<Pair<Position, Char>> {
+      val width = this[0].size
+      val height = size
+
+      return iterator {
+        for (x in 0 until width) {
+          for (y in 0 until height) {
+            yield(Position(x, y) to this@iterate[y][x])
           }
         }
       }
