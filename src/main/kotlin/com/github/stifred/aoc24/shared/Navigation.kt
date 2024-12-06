@@ -10,6 +10,14 @@ data class Position(val x: Int, val y: Int) {
   fun isWithin(topLeft: Position, rightBottom: Position): Boolean {
     return x in (topLeft.x..rightBottom.x) && y in (topLeft.y..rightBottom.y)
   }
+
+  fun isBehind(other: Position, dir: Direction) = this != other && when (dir) {
+    Direction.Left -> x >= other.x
+    Direction.Up -> y >= other.y
+    Direction.Right -> x <= other.x
+    Direction.Down -> y <= other.y
+    else -> error("Only non-diagonal directions supported")
+  }
 }
 
 enum class Direction(val x: Int, val y: Int) {
@@ -43,13 +51,24 @@ enum class Direction(val x: Int, val y: Int) {
     else -> this
   }
 
+  fun softLeft(): Direction = change(-1)
+  fun softRight(): Direction = change(1)
+
   fun hardLeft(): Direction = change(-2)
   fun hardRight(): Direction = change(2)
 
   private fun change(diff: Int): Direction {
     val index = entries.indexOf(this) + diff
     val size = entries.size
-    return if (index >= size) entries[index - size] else entries[index]
+    return when {
+      index >= size -> entries[index - size]
+      index < 0 -> entries[index + size]
+      else -> entries[index]
+    }
+  }
+
+  companion object {
+    val nonDiagonals by lazy { setOf(Left, Up, Right, Down) }
   }
 }
 

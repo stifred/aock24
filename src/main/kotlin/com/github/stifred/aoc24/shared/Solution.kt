@@ -75,6 +75,7 @@ class SolutionDsl(private val day: Int) {
   }
 
   private fun Duration.prettyPrint() = when {
+    this > Duration.ofSeconds(10) -> "${toSeconds()} s"
     this > Duration.ofMillis(10) -> "${toMillis()} ms"
     this > Duration.ofNanos(10_000) -> "${toNanos() / 1000} µs"
     else -> "${toNanos()} ns"
