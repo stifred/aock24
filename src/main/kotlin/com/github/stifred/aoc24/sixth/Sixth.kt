@@ -27,7 +27,7 @@ val sixth = solution(day = 6) {
     Map(
       guard = guards.first(),
       obstructions = obstructions,
-      max = Position(x = lines[0].length - 1, y = lines.size - 1)
+      max = Position(x = lines[0].length - 1, y = lines.size - 1),
     )
   }
 
@@ -62,7 +62,6 @@ data class Map(val guard: Guard, val obstructions: List<Obstruction>, val max: P
 
   fun findExtraObstructionPositions(): Set<Position> =
     simulatePatrol().asSequence()
-      .filter { it.isWithin(min, max) }
       .filter { copy(obstructions = obstructions + Obstruction(it)).simulatePatrol().isEmpty() }
       .toSet()
 
