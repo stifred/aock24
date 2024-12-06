@@ -1,11 +1,19 @@
 package com.github.stifred.aoc24.shared
 
+import java.io.File
+import java.io.FileOutputStream
 import java.time.Duration
 import java.time.Instant
 
 fun solution(day: Int, func: SolutionDsl.() -> Unit): Solution {
   val sol = SolutionDsl(day)
   sol.runner = func
+
+  val file = File("/tmp/day-${day}.txt")
+  if (!file.exists()) {
+    sol.javaClass.getResourceAsStream("/day-$day.txt")?.readAllBytes()
+      ?.let { FileOutputStream(file).write(it) }
+  }
 
   return Solution(day, sol)
 }
@@ -15,6 +23,7 @@ class Solution(val day: Int, private val dsl: SolutionDsl) {
   val last2 get() = dsl.lastPart2
 
   fun run() {
+    println("Day:           $day")
     dsl.runner(dsl)
   }
 }
