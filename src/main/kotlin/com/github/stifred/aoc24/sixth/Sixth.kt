@@ -35,11 +35,7 @@ val sixth = solution(day = 6) {
   part2 { map.findExtraObstructionPositions().size }
 }
 
-data class Map(
-  val guard: Guard,
-  val obstructions: List<Obstruction>,
-  val max: Position,
-) {
+data class Map(val guard: Guard, val obstructions: List<Obstruction>, val max: Position) {
   private val min = Position(0, 0)
 
   fun simulatePatrol(): Set<Position> = buildSet {
@@ -67,7 +63,6 @@ data class Map(
   fun findExtraObstructionPositions(): Set<Position> =
     simulatePatrol().asSequence()
       .filter { it.isWithin(min, max) }
-      .filter { !it.isObstructed() }
       .filter { copy(obstructions = obstructions + Obstruction(it)).simulatePatrol().isEmpty() }
       .toSet()
 
