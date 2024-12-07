@@ -1,7 +1,6 @@
 package com.github.stifred.aoc24.seventh
 
 import com.github.stifred.aoc24.shared.solution
-import java.util.concurrent.Executors
 
 val seventh = solution(day = 7) {
   val equations = parseInput { it.lines().map(String::asEquation) }
