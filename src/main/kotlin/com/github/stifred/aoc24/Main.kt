@@ -15,7 +15,7 @@ private val days = listOf(
   fourth,
   fifth,
   sixth,
-  seventh,
+  //seventh,
 )
 
 fun main() {

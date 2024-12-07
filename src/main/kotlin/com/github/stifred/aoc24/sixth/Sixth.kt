@@ -43,11 +43,27 @@ data class Map(val guard: Guard, val obstructions: List<Obstruction>, val max: P
 
     add(patroller.pos)
 
+    val obstructedBy = mutableListOf<Position>()
+
     var health = (max.x * max.y)
     while (health >= 0) {
       val next = patroller.pos.move(patroller.dir)
       if (next.isObstructed()) {
+        val lastIndex = obstructedBy.lastIndexOf(next)
+        if (lastIndex > 0) {
+          val length = obstructedBy.size - lastIndex
+          if (length < obstructedBy.size / 2) {
+            val first = obstructedBy.subList(lastIndex - length, obstructedBy.size - length)
+            val second = obstructedBy.subList(lastIndex, obstructedBy.size)
+            if (first == second) {
+              clear()
+              break
+            }
+          }
+        }
+
         patroller.dir = patroller.dir.hardRight()
+        obstructedBy += next
       } else {
         patroller.pos = next
       }
