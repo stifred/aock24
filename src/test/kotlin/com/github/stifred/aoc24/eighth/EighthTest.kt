@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test
 class EighthTest {
   @Test
   fun test() = runTest(eighth) {
-
+    expected1 = 14
+    expected2 = 34
   }
 }

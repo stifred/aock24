@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 class EquationTest {
-  val eq = Equation(
+  private val eq = Equation(
     testValue = 7290,
     operands = listOf(6, 8, 6, 15),
   )

@@ -11,6 +11,9 @@ data class Position(val x: Int, val y: Int) {
     return x in (topLeft.x..rightBottom.x) && y in (topLeft.y..rightBottom.y)
   }
 
+  operator fun minus(other: Position) = Position(x = x - other.x, y = y - other.y)
+  operator fun plus(other: Position) = Position(x = x + other.x, y = y + other.y)
+
   fun isBehind(other: Position, dir: Direction) = this != other && when (dir) {
     Direction.Left -> x >= other.x
     Direction.Up -> y >= other.y
@@ -93,4 +96,3 @@ fun Pair<Position, Direction>.parallels(word: String, width: Int, height: Int): 
     }
   }
 }
-

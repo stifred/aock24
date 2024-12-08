@@ -3,17 +3,17 @@ package com.github.stifred.aoc24.seventh
 import com.github.stifred.aoc24.shared.solution
 
 val seventh = solution(day = 7) {
-  val equations = parseInput { it.lines().map(String::asEquation) }
+  val equations = parseInput { it.lineSequence().map(String::asEquation).toList() }
 
   part1 {
     equations.asSequence()
       .filter { it.trySolve(Operator.allButConcat) }
-      .sumOf(Equation::testValue)
+      .sumOf { it.testValue }
   }
   part2 {
     equations.asSequence()
       .filter { it.trySolve(Operator.all) }
-      .sumOf(Equation::testValue)
+      .sumOf { it.testValue }
   }
 }
 
@@ -36,12 +36,19 @@ enum class Operator {
   fun apply(a: Long, b: Long) = when (this) {
     Addition -> a + b
     Multiplication -> a * b
-    Concat -> "$a$b".toLong()
+    Concat -> scales.first { it > b }.let { (a * it) + b }
   }
 
   companion object {
     val allButConcat = listOf(Addition, Multiplication)
     val all = entries
+    private val scales: LongArray = buildList {
+      var a = 1L
+      do {
+        a *= 10L
+        add(a)
+      } while (a < Long.MAX_VALUE / 10)
+    }.toLongArray()
 
     private val cache = mutableMapOf<Pair<Int, Int>, List<List<Operator>>>()
     fun combo(operators: List<Operator>, operandCount: Int): Sequence<List<Operator>> {
