@@ -54,6 +54,8 @@ enum class Direction(val x: Int, val y: Int) {
     else -> this
   }
 
+  fun opposite() = change(4)
+
   fun softLeft(): Direction = change(-1)
   fun softRight(): Direction = change(1)
 

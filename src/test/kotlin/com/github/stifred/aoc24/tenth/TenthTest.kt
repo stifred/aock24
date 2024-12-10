@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test
 class TenthTest {
   @Test
   fun test() = runTest(tenth) {
-
+    expected1 = 36
+    expected2 = 81
   }
 }
