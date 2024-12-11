@@ -41,34 +41,34 @@ class SolutionDsl(private val day: Int) {
       .readAllBytes()
       .toString(Charsets.UTF_8)
 
-    val before = Instant.now()
+    val before = System.nanoTime()
     val ret = parser(text)
-    val after = Instant.now()
+    val after = System.nanoTime()
 
     if (timed) {
-      println("Parse time:    " + Duration.between(before, after).prettyPrint())
+      println("Parse time:    " + Duration.ofNanos(after - before).prettyPrint())
     }
 
     return ret
   }
 
   fun part1(act: () -> Any) {
-    val before = Instant.now()
+    val before = System.nanoTime()
     val ret = act()
-    val after = Instant.now()
+    val after = System.nanoTime()
 
-    println("Part 1 time:   ${Duration.between(before, after).prettyPrint()}")
+    println("Part 1 time:   ${Duration.ofNanos(after - before).prettyPrint()}")
     println("Part 1 output: $ret")
 
     lastPart1 = ret
   }
 
   fun part2(act: () -> Any) {
-    val before = Instant.now()
+    val before = System.nanoTime()
     val ret = act()
-    val after = Instant.now()
+    val after = System.nanoTime()
 
-    println("Part 2 time:   ${Duration.between(before, after).prettyPrint()}")
+    println("Part 2 time:   ${Duration.ofNanos(after - before).prettyPrint()}")
     println("Part 2 output: $ret")
 
     lastPart2 = ret
