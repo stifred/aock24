@@ -11,6 +11,7 @@ import com.github.stifred.aoc24.seventh.seventh
 import com.github.stifred.aoc24.sixth.sixth
 import com.github.stifred.aoc24.tenth.tenth
 import com.github.stifred.aoc24.third.third
+import com.github.stifred.aoc24.twelfth.twelfth
 
 private val days = listOf(
   first,
@@ -24,10 +25,15 @@ private val days = listOf(
   ninth,
   tenth,
   eleventh,
+  twelfth,
 )
 
 fun main() {
   val last = days.maxBy { it.day }
 
-  last.run()
+  last.run(
+    runFirst = true,
+    runSecond = true,
+    runBenchmark = false,
+  )
 }

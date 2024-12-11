@@ -3,12 +3,7 @@ package com.github.stifred.aoc24.eleventh
 import com.github.stifred.aoc24.shared.solution
 
 val eleventh = solution(day = 11) {
-  val stones = parseInput { raw ->
-    raw.split(' ').asSequence()
-      .filter { it.isNotBlank() }
-      .map { it.toLong() }
-      .toList()
-  }
+  val stones = parseInput { it.split(' ').map(String::toLong) }
 
   part1 { stones.multiBlink(25) }
   part2 { stones.multiBlink(75) }

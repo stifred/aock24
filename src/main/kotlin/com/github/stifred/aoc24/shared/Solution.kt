@@ -3,7 +3,9 @@ package com.github.stifred.aoc24.shared
 import java.io.File
 import java.io.FileOutputStream
 import java.time.Duration
-import java.time.Instant
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
+import kotlin.math.max
 
 fun solution(day: Int, func: SolutionDsl.() -> Unit): Solution {
   val sol = SolutionDsl(day)
@@ -22,8 +24,16 @@ class Solution(val day: Int, private val dsl: SolutionDsl) {
   val last1 get() = dsl.lastPart1
   val last2 get() = dsl.lastPart2
 
-  fun run() {
-    println("Day:           $day")
+  fun run(
+    runFirst: Boolean = true,
+    runSecond: Boolean = true,
+    runBenchmark: Boolean = false,
+  ) {
+    dsl.runFirst.set(runFirst)
+    dsl.runSecond.set(runSecond)
+    dsl.runBenchmark.set(if (runBenchmark) 3 else 0)
+
+    println("Day:            $day")
     dsl.runner(dsl)
   }
 }
@@ -33,6 +43,10 @@ class SolutionDsl(private val day: Int) {
 
   lateinit var lastPart1: Any
   lateinit var lastPart2: Any
+
+  val runFirst = AtomicBoolean(true)
+  val runSecond = AtomicBoolean(true)
+  val runBenchmark = AtomicInteger(0)
 
   fun parseInput(): String = parseInput(timed = false) { it }
 
@@ -46,33 +60,53 @@ class SolutionDsl(private val day: Int) {
     val after = System.nanoTime()
 
     if (timed) {
-      println("Parse time:    " + Duration.ofNanos(after - before).prettyPrint())
+      val duration = Duration.ofNanos(after - before)
+      println("Parse time:     ${duration.prettyPrint()}")
+
+      if (runBenchmark.getAndDecrement() > 0) {
+        val reps = duration.repeatCount()
+        println("Parse BM reps:  $reps")
+        val bmBefore = System.nanoTime()
+        repeat(reps) { parser(text) }
+        val bmAfter = System.nanoTime()
+        println("Parse BM time:  ${Duration.ofNanos((bmAfter - bmBefore) / reps).prettyPrint()}")
+      }
     }
 
     return ret
   }
 
-  fun part1(act: () -> Any) {
+  fun part1(act: () -> Any) = part(1, runFirst, act)
+  fun part2(act: () -> Any) = part(2, runSecond, act)
+
+  private fun part(int: Int, shouldRun: AtomicBoolean, act: () -> Any) {
+    if (!shouldRun.getAndSet(true)) return
+    println(" ")
+
     val before = System.nanoTime()
     val ret = act()
     val after = System.nanoTime()
+    val duration = Duration.ofNanos(after - before)
+    println("Part $int time:    ${duration.prettyPrint()}")
 
-    println("Part 1 time:   ${Duration.ofNanos(after - before).prettyPrint()}")
-    println("Part 1 output: $ret")
+    println("Part $int output:  $ret")
 
-    lastPart1 = ret
+    if (runBenchmark.getAndDecrement() > 0) {
+      val reps = duration.repeatCount()
+      println("Part $int BM reps: $reps")
+      val bmBefore = System.nanoTime()
+      repeat(reps) { act() }
+      val bmAfter = System.nanoTime()
+      println("Part $int BM time: ${Duration.ofNanos((bmAfter - bmBefore) / reps).prettyPrint()}")
+    }
+
+    when (int) {
+      1 -> lastPart1 = ret
+      2 -> lastPart2 = ret
+    }
   }
 
-  fun part2(act: () -> Any) {
-    val before = System.nanoTime()
-    val ret = act()
-    val after = System.nanoTime()
-
-    println("Part 2 time:   ${Duration.ofNanos(after - before).prettyPrint()}")
-    println("Part 2 output: $ret")
-
-    lastPart2 = ret
-  }
+  private fun Duration.repeatCount(): Int = max((30_000_000_000 / toNanos()).toInt(), 1)
 
   private fun Duration.prettyPrint() = when {
     this > Duration.ofSeconds(10) -> "${toSeconds()} s"
