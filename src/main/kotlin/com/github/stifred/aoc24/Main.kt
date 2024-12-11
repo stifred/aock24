@@ -25,6 +25,7 @@ private val days = listOf(
   ninth,
   tenth,
   eleventh,
+  twelfth,
 )
 
 fun main() {
@@ -33,6 +34,6 @@ fun main() {
   last.run(
     runFirst = true,
     runSecond = true,
-    runBenchmark = true,
+    runBenchmark = false,
   )
 }
