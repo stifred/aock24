@@ -33,18 +33,25 @@ fun Long.blinkWithCache(rounds: Int, cache: MutableMap<Pair<Long, Int>, Long>): 
     return cached
   }
 
-  val valueStr by lazy { toString() }
-
-  return when {
-    this == 0L -> 1L.blinkWithCache(rounds - 1, cache)
-    valueStr.length % 2 == 0 -> {
-      val half = valueStr.length / 2
-
-      val first = valueStr.substring(0 until half).toLong()
-      val second = valueStr.substring(half).toLong()
+  return if (this == 0L) {
+    1L.blinkWithCache(rounds - 1, cache)
+  } else {
+    val matcher = evenPairs.firstOrNull { (_, r) -> this in r }
+    if (matcher != null) {
+      val first = (this % matcher.first)
+      val second = (this / matcher.first)
 
       first.blinkWithCache(rounds - 1, cache) + second.blinkWithCache(rounds - 1, cache)
-    }
-    else -> (this * 2024).blinkWithCache(rounds - 1, cache)
+    } else (this * 2024).blinkWithCache(rounds - 1, cache)
   }.also { cache[this to rounds] = it }
+}
+
+private val evenPairs = buildList {
+  var i = 10L
+  var j = 10L
+  repeat(8) {
+    add(i to (j until j * 10))
+    i *= 10
+    j *= 100
+  }
 }
