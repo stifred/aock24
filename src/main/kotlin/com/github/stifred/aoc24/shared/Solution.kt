@@ -51,6 +51,8 @@ class SolutionDsl(private val day: Int) {
   fun parseInput(): String = parseInput(timed = false) { it }
 
   fun <T> parseInput(timed: Boolean = true, parser: (String) -> T): T {
+    println(" ")
+
     val text = javaClass.getResourceAsStream("/day-$day.txt")!!
       .readAllBytes()
       .toString(Charsets.UTF_8)
