@@ -14,6 +14,12 @@ data class Position(val x: Int, val y: Int) {
   operator fun minus(other: Position) = Position(x = x - other.x, y = y - other.y)
   operator fun plus(other: Position) = Position(x = x + other.x, y = y + other.y)
 
+  infix fun touches(other: Position) = when {
+    x == other.x -> y in (other.y - 1)..(other.y + 1)
+    y == other.y -> x in (other.x - 1)..(other.x + 1)
+    else -> false
+  }
+
   fun isBehind(other: Position, dir: Direction) = this != other && when (dir) {
     Direction.Left -> x >= other.x
     Direction.Up -> y >= other.y
@@ -62,6 +68,14 @@ enum class Direction(val x: Int, val y: Int) {
   fun hardLeft(): Direction = change(-2)
   fun hardRight(): Direction = change(2)
 
+  fun normals() = when {
+    isHorizontal() -> verticals
+    isVertical() -> horizontals
+    else -> error("")
+  }
+  fun isHorizontal() = this in horizontals
+  fun isVertical() = this in verticals
+
   private fun change(diff: Int): Direction {
     val index = entries.indexOf(this) + diff
     val size = entries.size
@@ -73,6 +87,8 @@ enum class Direction(val x: Int, val y: Int) {
   }
 
   companion object {
+    val horizontals by lazy { setOf(Left, Right) }
+    val verticals by lazy { setOf(Up, Down) }
     val nonDiagonals by lazy { setOf(Left, Up, Right, Down) }
   }
 }

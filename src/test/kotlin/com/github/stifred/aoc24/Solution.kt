@@ -5,6 +5,7 @@ import java.io.BufferedReader
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStreamReader
+import java.nio.file.*
 import kotlin.test.assertEquals
 
 fun runTest(
@@ -16,9 +17,8 @@ fun runTest(
 
     fileName
       ?.let { javaClass.getResourceAsStream(it) }
-      ?.let(::InputStreamReader)
-      ?.let(::BufferedReader)
-      ?.let { FileOutputStream("/tmp/day-${solution.day}.txt") }
+      ?.let { Files.copy(it, Paths.get("/tmp/day-${solution.day}.txt"), StandardCopyOption.REPLACE_EXISTING) }
+      ?.also { println("Using filename:  $fileName") }
 
     solution.run()
 
