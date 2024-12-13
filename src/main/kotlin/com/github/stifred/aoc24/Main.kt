@@ -11,6 +11,7 @@ import com.github.stifred.aoc24.seventh.seventh
 import com.github.stifred.aoc24.sixth.sixth
 import com.github.stifred.aoc24.tenth.tenth
 import com.github.stifred.aoc24.third.third
+import com.github.stifred.aoc24.thirteenth.thirteenth
 import com.github.stifred.aoc24.twelfth.twelfth
 
 private val days = listOf(
@@ -26,6 +27,7 @@ private val days = listOf(
   tenth,
   eleventh,
   twelfth,
+  thirteenth,
 )
 
 fun main() {
@@ -34,6 +36,6 @@ fun main() {
   last.run(
     runFirst = true,
     runSecond = true,
-    runBenchmark = true,
+    runBenchmark = false,
   )
 }

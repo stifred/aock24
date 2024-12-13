@@ -13,20 +13,21 @@ data class Position(val x: Int, val y: Int) {
 
   operator fun minus(other: Position) = Position(x = x - other.x, y = y - other.y)
   operator fun plus(other: Position) = Position(x = x + other.x, y = y + other.y)
+  operator fun times(int: Int) = Position(x = int * x, y = int * y)
 
   infix fun touches(other: Position) = when {
     x == other.x -> y in (other.y - 1)..(other.y + 1)
     y == other.y -> x in (other.x - 1)..(other.x + 1)
     else -> false
   }
+}
 
-  fun isBehind(other: Position, dir: Direction) = this != other && when (dir) {
-    Direction.Left -> x >= other.x
-    Direction.Up -> y >= other.y
-    Direction.Right -> x <= other.x
-    Direction.Down -> y <= other.y
-    else -> error("Only non-diagonal directions supported")
-  }
+data class LongPosition(val x: Long, val y: Long) {
+  fun move(dir: Direction) = copy(x = x + dir.x, y = y + dir.y)
+
+  operator fun minus(other: LongPosition) = LongPosition(x = x - other.x, y = y - other.y)
+  operator fun plus(other: LongPosition) = LongPosition(x = x + other.x, y = y + other.y)
+  operator fun times(long: Long) = LongPosition(x = long * x, y = long * y)
 }
 
 enum class Direction(val x: Int, val y: Int) {
