@@ -36,6 +36,6 @@ fun main() {
   last.run(
     runFirst = true,
     runSecond = true,
-    runBenchmark = false,
+    runBenchmark = true,
   )
 }

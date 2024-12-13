@@ -2,6 +2,7 @@ package com.github.stifred.aoc24.thirteenth
 
 import com.github.stifred.aoc24.shared.LongPosition
 import com.github.stifred.aoc24.shared.solution
+import kotlin.math.abs
 import kotlin.math.roundToLong
 
 val thirteenth = solution(day = 13) {
@@ -12,10 +13,7 @@ val thirteenth = solution(day = 13) {
   }
 
   part2 {
-    machines.asSequence()
-      .map { it.getReal() }
-      .mapNotNull { it.minimumTokensOrNullFast() }
-      .sum()
+    machines.sumOf { it.getReal().minimumTokensOrNullFast() ?: 0 }
   }
 }
 
@@ -36,56 +34,27 @@ data class Machine(
     val i = prize.x.toDouble()
     val j = prize.y.toDouble()
 
+    // If B and A are whole numbers, then a prize can be won.
+
     val B = (i - (j * x / y)) / (X - (Y * x / y))
-    val A = (j/y) - ((B * Y)/y)
-
-    val aCount = A.roundToLong()
     val bCount = B.roundToLong()
+    if (abs(bCount - B) > 0.001) return null
 
-    return if (a * aCount + b * bCount == prize) (aCount * 3) + bCount else null
-  }
+    val A = (j/y) - ((B * Y)/y)
+    val aCount = A.roundToLong()
+    if (abs(aCount - A) > 0.001) return null
 
-  fun minimumTokensOrNullSlow(): Long? {
-    // This was my original solution that worked for part 1, but was too slow for part 2.
-
-    val maxA = maxOf(prize.x / a.x, prize.y / a.y)
-    val maxB = maxOf(prize.x / b.x, prize.y / b.y)
-
-    for (aCount in 0..maxA) {
-      for (bCount in 0..maxB) {
-        val current = a * aCount + b * bCount
-
-        if (current == prize) {
-          return (aCount * 3) + bCount
-        }
-
-        if (current.x > prize.x || current.y > prize.y) {
-          break
-        }
-      }
-    }
-
-    return null
+    return (aCount * 3) + bCount
   }
 }
 
-fun String.toMachines() = split("\n\n").map { it.toMachine() }
+fun String.toMachines() = split("\n\n").map(String::toMachine)
 
-fun String.toMachine(): Machine {
-  val (l1, l2, l3) = lines()
-
-  return Machine(
-    a = LongPosition(
-      x = l1.substring(l1.indexOf("A: X+") + 5, l1.indexOf(",")).toLong(),
-      y = l1.substring(l1.indexOf(", Y+") + 4).toLong(),
-    ),
-    b = LongPosition(
-      x = l2.substring(l2.indexOf("B: X+") + 5, l2.indexOf(",")).toLong(),
-      y = l2.substring(l2.indexOf(", Y+") + 4).toLong(),
-    ),
-    prize = LongPosition(
-      x = l3.substring(9, l3.indexOf(", ")).toLong(),
-      y = l3.substring(l3.indexOf(", Y=") + 4).toLong(),
-    ),
-  )
+fun String.toMachine() = lines().let { (l1, l2, l3) ->
+  Machine(a = l1.toPosition(12), b = l2.toPosition(12), prize = l3.toPosition(9))
 }
+
+private fun String.toPosition(offset: Int) = LongPosition(
+  x = substring(offset, indexOf(',')).toLong(),
+  y = substring(indexOf("Y") + 2).toLong(),
+)

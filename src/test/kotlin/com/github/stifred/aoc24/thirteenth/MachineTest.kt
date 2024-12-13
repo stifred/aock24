@@ -19,7 +19,6 @@ class MachineTest {
     """.trimIndent().toMachine()
 
     assertEquals(expected, machine)
-    assertEquals(280, machine.minimumTokensOrNullSlow())
     assertEquals(280, machine.minimumTokensOrNullFast())
   }
 
@@ -31,7 +30,6 @@ class MachineTest {
       Prize: X=7870, Y=6450
     """.trimIndent().toMachine()
 
-    assertEquals(200, machine.minimumTokensOrNullSlow())
     assertEquals(200, machine.minimumTokensOrNullFast())
   }
 
@@ -49,7 +47,6 @@ class MachineTest {
     """.trimIndent().toMachine()
 
     assertEquals(expected, machine)
-    assertEquals(null, machine.minimumTokensOrNullSlow())
     assertEquals(null, machine.minimumTokensOrNullFast())
   }
 }
