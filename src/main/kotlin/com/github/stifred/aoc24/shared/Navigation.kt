@@ -115,3 +115,5 @@ fun Pair<Position, Direction>.parallels(word: String, width: Int, height: Int): 
     }
   }
 }
+
+fun String.asPosition() = split(',').let { (x, y) -> Position(x.toInt(), y.toInt()) }
