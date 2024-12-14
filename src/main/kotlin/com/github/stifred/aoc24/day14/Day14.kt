@@ -59,20 +59,6 @@ data class Area(val size: Position, val robots: List<Robot> = listOf(), val time
 
 val Iterable<Area>.totalSafetyFactor get() = fold(1) { acc, a -> acc * a.safetyFactor }
 
-private fun Set<Position>.isFestivelyArranged(): Boolean {
-  for (pos in this) {
-    var found = true
-
-    // Sixteen on top of each other = instant Christmas tree
-    for (y in 1..16) {
-      if (Position(pos.x, pos.y + y) !in this) {
-        found = false
-        break
-      }
-    }
-
-    if (found) return true
-  }
-
-  return false
+private fun Collection<Position>.isFestivelyArranged() = any { pos ->
+  (1..16).none { Position(pos.x, pos.y + it) !in this }
 }
