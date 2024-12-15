@@ -4,144 +4,125 @@ import com.github.stifred.aoc24.shared.Direction
 import com.github.stifred.aoc24.shared.Direction.Companion.asDirectionOrNull
 import com.github.stifred.aoc24.shared.Position
 import com.github.stifred.aoc24.shared.solution
+import java.util.*
+import java.util.concurrent.atomic.AtomicInteger
 
 val day15 = solution(day = 15) {
-  val warehouse = parseInput { it.asWarehouse() }
+  val warehouse = parseInput { it.asWarehouseMap() }
 
   part1 { warehouse.withAllTicks().gpsSum }
   part2 { warehouse.widen().withAllTicks().gpsSum }
 }
 
-enum class Entity {
-  Robot, Box, BoxLeft, BoxRight, Wall, Floor;
-
-  val isBox get() = this in boxes
-
-  companion object {
-    private val boxes by lazy { arrayOf(Box, BoxLeft, BoxRight) }
-  }
-}
-
-data class Warehouse(
-  private val entities: List<Entity>,
+data class WarehouseMap(
+  private val objects: List<Object>,
   private val moves: List<Direction>,
-  private val width: Int,
   private val time: Int = 0,
 ) {
-  val gpsSum: Int
-    get() = entities.withIndex().asSequence()
-      .filter { (_, e) -> e == gpsSource }
-      .map { (i, _) -> i.asPosition() }
-      .sumOf { (x, y) -> x + (y * 100) }
+  val gpsSum: Int = objects.asSequence()
+    .filter { it.kind == Object.Kind.Box }
+    .map { it.position }
+    .sumOf { (x, y) -> x + (y * 100) }
 
-  fun withAllTicks(): Warehouse {
+  fun widen(): WarehouseMap = copy(objects = objects.map(Object::widen))
+
+  fun withAllTicks(): WarehouseMap {
     var current = this
-    while (!current.done) {
-      current = current.withTick()
+    val totalTime = moves.size
+    while (current.time < totalTime) {
+      current = current.tick()
     }
+
     return current
   }
 
-  fun widen() = copy(
-    entities = entities.flatMap { entity ->
-      when (entity) {
-        Entity.Box -> sequenceOf(Entity.BoxLeft, Entity.BoxRight)
-        Entity.Floor -> sequenceOf(Entity.Floor, Entity.Floor)
-        Entity.Wall -> sequenceOf(Entity.Wall, Entity.Wall)
-        Entity.Robot -> sequenceOf(Entity.Robot, Entity.Floor)
-        else -> error("Already a second warehouse?")
+  private fun tick(): WarehouseMap {
+    val allMoved = robot.attemptMove(moves[time])
+    if (allMoved.isNotEmpty()) {
+      val objMap = objects.associateBy { it.id }.toMutableMap()
+      for (moved in allMoved) {
+        objMap[moved.id] = moved
       }
-    },
-    width = width * 2,
-  )
 
-  private fun withTick(): Warehouse {
-    if (done) return this
-
-    val robotIndex = entities.indexOf(Entity.Robot)
-    val nextMove = moves[time]
-
-    val mutable = entities.toMutableList()
-
-    return if (mutable.swap(robotIndex.asPosition(), nextMove)) {
-      copy(entities = mutable.toList(), time = time + 1)
-    } else {
-      copy(time = time + 1)
-    }
+      return copy(
+        objects = objMap.values.toList(),
+        time = time + 1,
+      )
+    } else return copy(time = time + 1)
   }
 
-  private fun MutableList<Entity>.swap(fromPos: Position, dir: Direction): Boolean {
-    return swap(withNeeded(fromPos, dir).toSet(), dir)
-  }
+  private fun Object.attemptMove(dir: Direction): List<Object> {
+    if (kind == Object.Kind.Wall) return emptyList()
 
-  private fun List<Entity>.withNeeded(fromPos: Position, dir: Direction) = when (get(fromPos.asIndex())) {
-    Entity.BoxLeft -> sequence {
-      yield(fromPos)
-      if (dir.isVertical()) yield(fromPos.move(Direction.Right))
-    }
-    Entity.BoxRight -> sequence {
-      yield(fromPos)
-      if (dir.isVertical()) yield(fromPos.move(Direction.Left))
-    }
-    else -> sequenceOf(fromPos)
-  }
-
-  private fun MutableList<Entity>.swap(positions: Set<Position>, dir: Direction): Boolean {
-    val afterPositions = positions.asSequence()
-      .map { it.move(dir) }
-      .flatMap { withNeeded(it, dir) }
+    val moved = moved(dir)
+    val conflicts = moved.positions.asSequence()
+      .mapNotNull { at(it) }
+      .filter { it.id != id }
       .toSet()
 
-    if (afterPositions.any { get(it.asIndex()) == Entity.Wall }) {
-      return false
+    val movedAndPushed = mutableListOf(moved)
+    for (conflict in conflicts) {
+      val pushed = conflict.attemptMove(dir)
+      if (pushed.isNotEmpty()) {
+        movedAndPushed += pushed
+      } else return emptyList()
     }
 
-    val needCheck = afterPositions.filter { get(it.asIndex()).isBox }.toSet()
-    if (needCheck.isNotEmpty() && !swap(needCheck, dir)) {
-      return false
-    }
-
-    if (afterPositions.all { get(it.asIndex()) == Entity.Floor }) {
-      for (pos in positions) {
-        val fromIndex = pos.asIndex()
-        val toIndex = pos.move(dir).asIndex()
-
-        val current = get(fromIndex)
-        val next = get(toIndex)
-
-        set(fromIndex, next)
-        set(toIndex, current)
-      }
-
-      return true
-    }
-
-    return false
+    return movedAndPushed
   }
 
-  private val done get() = time >= moves.size
-  private val gpsSource = if (Entity.BoxLeft in entities) Entity.BoxLeft else Entity.Box
-
-  private fun Int.asPosition() = Position(this % width, this / width)
-  private fun Position.asIndex() = this.y * width + this.x
+  private val robot get() = objects.first { it.kind == Object.Kind.Robot }
+  private fun at(pos: Position) = objects.firstOrNull { pos in it.positions }
 }
 
-fun String.asWarehouse(): Warehouse {
+data class Object(
+  val kind: Kind,
+  val positions: Set<Position>,
+  val id: Int = nextId.incrementAndGet(),
+) {
+  fun widen() = when (kind) {
+    Kind.Robot -> copy(positions = positions.map { it.copy(x = it.x * 2, y = it.y) }.toSet())
+    Kind.Box, Kind.Wall -> copy(
+      positions = positions.flatMap {
+        setOf(it.copy(x = it.x * 2, y = it.y), it.copy(x = (it.x * 2) + 1, y = it.y))
+      }.toSet(),
+    )
+  }
+
+  val position get() = positions.first()
+
+  fun moved(dir: Direction) = copy(positions = positions.asSequence().map { it.move(dir) }.toSet())
+
+  enum class Kind { Robot, Box, Wall }
+
+  override fun equals(other: Any?): Boolean = other is Object && other.kind == kind && other.positions == positions
+  override fun hashCode(): Int = Objects.hash(kind, positions)
+
+  companion object {
+    private val nextId = AtomicInteger(0)
+  }
+}
+
+fun String.asWarehouseMap(): WarehouseMap {
   val (roomStr, moveStr) = split("\n\n")
 
-  val entities = roomStr.mapNotNull { char ->
-    when (char) {
-      '.' -> Entity.Floor
-      '#' -> Entity.Wall
-      'O' -> Entity.Box
-      '@' -> Entity.Robot
-      '[' -> Entity.BoxLeft
-      ']' -> Entity.BoxRight
-      else -> null
+  val wallPositions = mutableSetOf<Position>()
+  val objects = mutableListOf<Object>()
+  val moves = moveStr.mapNotNull { it.asDirectionOrNull() }
+
+  for ((y, line) in roomStr.lines().withIndex()) {
+    for ((x, char) in line.withIndex()) {
+      val pos = Position(x, y)
+
+      when (char) {
+        '#' -> wallPositions += pos
+        '[' -> objects += Object(Object.Kind.Box, setOf(pos, pos.move(Direction.Right)))
+        'O' -> objects += Object(Object.Kind.Box, setOf(pos))
+        '@' -> objects += Object(Object.Kind.Robot, setOf(pos))
+      }
     }
   }
-  val moves = moveStr.mapNotNull { it.asDirectionOrNull() }
-  val width = roomStr.indexOf('\n')
+  objects += Object(Object.Kind.Wall, wallPositions)
 
-  return Warehouse(entities, moves, width)
+  return WarehouseMap(objects, moves)
 }

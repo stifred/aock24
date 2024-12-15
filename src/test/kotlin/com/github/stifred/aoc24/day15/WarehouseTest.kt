@@ -17,7 +17,7 @@ class WarehouseTest {
       ########
 
       <^^>>>vv<v>>v<<
-    """.trimIndent().asWarehouse()
+    """.trimIndent().asWarehouseMap()
     val after = before.withAllTicks()
 
     assertEquals(2028, after.gpsSum)
@@ -35,7 +35,7 @@ class WarehouseTest {
       #######
 
       <vv<<^^<<^^
-    """.trimIndent().asWarehouse()
+    """.trimIndent().asWarehouseMap()
     val widerBefore = """
       ##############
       ##......##..##
@@ -46,7 +46,7 @@ class WarehouseTest {
       ##############
 
       <vv<<^^<<^^
-    """.trimIndent().asWarehouse()
+    """.trimIndent().asWarehouseMap()
 
     assertEquals(widerBefore, original.widen())
 
