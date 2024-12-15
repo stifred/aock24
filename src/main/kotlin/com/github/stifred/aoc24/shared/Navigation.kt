@@ -91,6 +91,14 @@ enum class Direction(val x: Int, val y: Int) {
     val horizontals by lazy { setOf(Left, Right) }
     val verticals by lazy { setOf(Up, Down) }
     val nonDiagonals by lazy { setOf(Left, Up, Right, Down) }
+
+    fun Char.asDirectionOrNull() = when (this) {
+      '<' -> Left
+      '^' -> Up
+      '>' -> Right
+      'v' -> Down
+      else -> null
+    }
   }
 }
 
