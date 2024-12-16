@@ -19,10 +19,7 @@ data class WarehouseMap(
   private val moves: List<Direction>,
   private val time: Int = 0,
 ) {
-  val gpsSum: Int = objects.asSequence()
-    .filter { it.kind == Object.Kind.Box }
-    .map { it.position }
-    .sumOf { (x, y) -> x + (y * 100) }
+  val gpsSum: Int = objects.sumOf { it.gpsSum }
 
   fun widen(): WarehouseMap = copy(objects = objects.map(Object::widen))
 
@@ -90,6 +87,7 @@ data class Object(
   }
 
   val position get() = positions.first()
+  val gpsSum = if (this.kind == Kind.Box) position.let { (x, y) -> x + (y * 100) } else 0
 
   fun moved(dir: Direction) = copy(positions = positions.asSequence().map { it.move(dir) }.toSet())
 
@@ -107,7 +105,7 @@ fun String.asWarehouseMap(): WarehouseMap {
   val (roomStr, moveStr) = split("\n\n")
 
   val wallPositions = mutableSetOf<Position>()
-  val objects = mutableListOf<Object>()
+  val objects = mutableListOf(Object(Object.Kind.Wall, wallPositions))
   val moves = moveStr.mapNotNull { it.asDirectionOrNull() }
 
   for ((y, line) in roomStr.lines().withIndex()) {
@@ -122,7 +120,6 @@ fun String.asWarehouseMap(): WarehouseMap {
       }
     }
   }
-  objects += Object(Object.Kind.Wall, wallPositions)
 
   return WarehouseMap(objects, moves)
 }

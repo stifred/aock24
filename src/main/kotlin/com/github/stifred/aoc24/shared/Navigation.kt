@@ -125,3 +125,25 @@ fun Pair<Position, Direction>.parallels(word: String, width: Int, height: Int): 
 }
 
 fun String.asPosition() = split(',').let { (x, y) -> Position(x.toInt(), y.toInt()) }
+
+data class PositionWithDirection(val pos: Position, val dir: Direction) {
+  companion object {
+    infix fun Position.towards(dir: Direction) = PositionWithDirection(this, dir)
+    infix fun Direction.at(pos: Position) = PositionWithDirection(pos, this)
+  }
+}
+
+fun Collection<Position>.visualize() = buildString {
+  val min = Position(minOf(Position::x), minOf(Position::y))
+  val max = Position(maxOf(Position::x), maxOf(Position::y))
+  for (y in min.y..max.y) {
+    for (x in min.x..max.x) {
+      if (Position(x, y) in this@visualize) {
+        append('O')
+      } else {
+        append('.')
+      }
+    }
+    append('\n')
+  }
+}
