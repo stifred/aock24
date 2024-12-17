@@ -20,7 +20,10 @@ fun runTest(
       ?.let { Files.copy(it, Paths.get("/tmp/day-${solution.day}.txt"), StandardCopyOption.REPLACE_EXISTING) }
       ?.also { println("Using filename:  $fileName") }
 
-    solution.run()
+    solution.run(
+      runFirst = expected1 != null,
+      runSecond = expected2 != null,
+    )
 
     expected1?.let { assertEquals(it, solution.last1) }
     expected2?.let { assertEquals(it, solution.last2) }

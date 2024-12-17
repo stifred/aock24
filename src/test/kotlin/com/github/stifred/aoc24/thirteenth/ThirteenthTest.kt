@@ -6,6 +6,6 @@ import org.junit.jupiter.api.Test
 class ThirteenthTest {
   @Test
   fun test() = runTest(thirteenth) {
-    expected1 = 480
+    expected1 = 480L
   }
 }
