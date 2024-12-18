@@ -83,7 +83,6 @@ class DijkstraMaze(
   }
 }
 
-
 fun String.asDijkstraMaze(): DijkstraMaze {
   lateinit var start: Position
   lateinit var end: Position
