@@ -11,12 +11,12 @@ class DijkstraTest {
     val d = Dijkstra<Position, Unit> { pos, _ ->
       Direction.nonDiagonals.asSequence()
         .map { pos.move(it) }
-        .filter { (x, y) -> (x in 0..9 && y in 0..9) && !(x in 1..8 && y in 1..8) }
-        .forEach { add(Step(it, Unit, 10)) }
+        .filter { (x, y) -> (x in 0..9 && y in 0..9) && !(x in 2..8 && y in 2..8) }
+        .forEach { yield(Step(it, Unit, 10)) }
     }
 
     val paths = d.bestPathsBetween(start, end, Unit)
 
-    assertEquals(2, paths.size)
+    assertEquals(20, paths.size)
   }
 }

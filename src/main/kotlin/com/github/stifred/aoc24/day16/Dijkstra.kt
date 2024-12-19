@@ -1,10 +1,7 @@
 package com.github.stifred.aoc24.day16
 
-import com.github.stifred.aoc24.shared.Direction
-import com.github.stifred.aoc24.shared.Position
-import com.github.stifred.aoc24.shared.PositionWithDirection
+import com.github.stifred.aoc24.shared.*
 import com.github.stifred.aoc24.shared.PositionWithDirection.Companion.towards
-import com.github.stifred.aoc24.shared.solution
 
 val day16 = solution(day = 16) {
   val maze = parseInput { it.asDijkstraMaze() }
@@ -18,69 +15,26 @@ class DijkstraMaze(
   private val start: Position,
   private val end: Position,
 ) {
-  val lowestScore get() = sptSet.filter { it.key.pos == end }.minOf { it.value }
-  val goodSittingPlaces get(): Int {
-    val lastPosWithDir = sptSet.filter { it.key.pos == end }.minBy { it.value }.key
+  private val dijkstra = Dijkstra<Position, Direction> { pos, dir ->
+    val next = pos.move(dir)
+    if (next in vertices) {
+      yield(Step(next, dir, 1))
+    }
 
-    return buildSet {
-      val toCheck = ArrayDeque(setOf(lastPosWithDir))
-      add(end)
-
-      while (toCheck.isNotEmpty()) {
-        val pwd = toCheck.removeFirst()
-        val score = sptSet.getValue(pwd)
-        val (pos, dir) = pwd
-
-        val previousPos = pos.move(dir.opposite())
-        val previousCandidates = sptSet.filter { (pwd) -> pwd.pos == previousPos }
-
-        for ((prevPwd, prevScore) in previousCandidates) {
-          val (prevPos, prevDir) = prevPwd
-
-          if (prevDir == dir && prevScore == score - 1
-            || prevDir != dir && prevScore == score - 1001) {
-            add(prevPos)
-            toCheck.addLast(prevPos towards prevDir)
-          }
-        }
-      }
-    }.size
-  }
-
-  private val sptSet: Map<PositionWithDirection, Int> by lazy {
-    buildMap {
-      put(start towards Direction.Right, 0)
-
-      fun getScore(pwd: PositionWithDirection) = this[pwd] ?: Int.MAX_VALUE
-
-      val toCheck = mutableSetOf(start towards Direction.Right)
-
-      while (true) {
-        val pwd = toCheck.minByOrNull { getScore(it) } ?: break
-        toCheck.remove(pwd)
-
-        val next = pwd.pos.move(pwd.dir) towards pwd.dir
-        val valueAfterNext = getScore(pwd) + 1
-        if (next.pos in vertices && getScore(next) > valueAfterNext) {
-          put(next, getValue(pwd) + 1)
-          if (next.pos == end) break
-
-          toCheck += next
-        }
-
-        for (turn in sequenceOf(pwd.dir.hardLeft(), pwd.dir.hardRight())) {
-          val nextAfterTurn = pwd.pos.move(turn) towards turn
-          val valueAfterTurn = getScore(pwd) + 1001
-          if (nextAfterTurn.pos in vertices && getScore(nextAfterTurn) > valueAfterTurn) {
-            put(nextAfterTurn, valueAfterTurn)
-            if (nextAfterTurn.pos == end) break
-
-            toCheck += nextAfterTurn
-          }
-        }
+    for (turn in sequenceOf(dir.hardLeft(), dir.hardRight())) {
+      val nextAfterTurn = pos.move(turn)
+      if (nextAfterTurn in vertices) {
+        yield(Step(nextAfterTurn, turn, 1001))
       }
     }
   }
+
+  val lowestScore get() = dijkstra.bestPathsBetween(start, end, Direction.Right).first().totalCost
+  val goodSittingPlaces get() = dijkstra.bestPathsBetween(start, end, Direction.Right).asSequence()
+    .flatMap { it.steps }
+    .map { it.vertex }
+    .distinct()
+    .count()
 }
 
 fun String.asDijkstraMaze(): DijkstraMaze {
