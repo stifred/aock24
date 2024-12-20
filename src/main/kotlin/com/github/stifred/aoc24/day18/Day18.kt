@@ -1,6 +1,8 @@
 package com.github.stifred.aoc24.day18
 
 import com.github.stifred.aoc24.shared.*
+import com.github.stifred.aoc24.shared.search.SearchStateWithKey
+import com.github.stifred.aoc24.shared.search.dijkstra
 
 val day18 = solution(day = 18) {
   val memSpace = parseInput { it.asMemorySpace() }
@@ -50,6 +52,8 @@ data class MemorySpace(
   }
 
   private fun Position.isSafe() = isWithin(topLeft, exit) && this !in fallen
+
+  data class PositionState(override val key: Position, override val cost: Int) : SearchStateWithKey<Position>
 
   companion object {
     private val topLeft: Position = Position(0, 0)

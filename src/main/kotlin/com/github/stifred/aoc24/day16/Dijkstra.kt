@@ -2,6 +2,8 @@ package com.github.stifred.aoc24.day16
 
 import com.github.stifred.aoc24.shared.*
 import com.github.stifred.aoc24.shared.PositionWithDirection.Companion.towards
+import com.github.stifred.aoc24.shared.search.SearchStateWithKey
+import com.github.stifred.aoc24.shared.search.dijkstra
 
 val day16 = solution(day = 16) {
   val maze = parseInput { it.asDijkstraMaze() }
@@ -11,30 +13,66 @@ val day16 = solution(day = 16) {
 }
 
 class DijkstraMaze(
-  private val vertices: Set<Position>,
-  private val start: Position,
-  private val end: Position,
+  val vertices: Set<Position>,
+  val start: Position,
+  val end: Position,
 ) {
-  private val dijkstra = Dijkstra<Position, Direction> { pos, dir ->
-    val next = pos.move(dir)
-    if (next in vertices) {
-      yield(Step(next, dir, 1))
-    }
+  private val search = dijkstra(Reindeer::class)
+  private val finishingReindeer: List<Reindeer> get() {
+    search.reset()
+    search.continueWith(Reindeer(position = start))
 
-    for (turn in sequenceOf(dir.hardLeft(), dir.hardRight())) {
-      val nextAfterTurn = pos.move(turn)
-      if (nextAfterTurn in vertices) {
-        yield(Step(nextAfterTurn, turn, 1001))
+    var bestScore = Int.MAX_VALUE
+    return search.findAll { reindeer ->
+      val (position, direction, score, turnPositions) = reindeer
+
+      if (score > bestScore) {
+        skip()
+      }
+
+
+      if (position == end) {
+        bestScore = score
+        found(reindeer.copy(turnPositions = turnPositions + end))
+      } else {
+        val next = position.move(direction)
+        if (next in vertices) {
+          continueWith(reindeer.copy(position = next, score = score + 1))
+        }
+
+        for (turn in sequenceOf(direction.hardLeft(), direction.hardRight())) {
+          val nextAfterTurn = position.move(turn)
+          if (nextAfterTurn in vertices) {
+            val afterTurn = reindeer.copy(
+              position = nextAfterTurn,
+              direction = turn,
+              turnPositions = turnPositions + position,
+              score = score + 1001,
+            )
+
+            continueWith(afterTurn)
+          }
+        }
       }
     }
   }
 
-  val lowestScore get() = dijkstra.bestPathsBetween(start, end, Direction.Right).first().totalCost
-  val goodSittingPlaces get() = dijkstra.bestPathsBetween(start, end, Direction.Right).asSequence()
-    .flatMap { it.steps }
-    .map { it.vertex }
-    .distinct()
-    .count()
+  val lowestScore get() = finishingReindeer.first().score
+  val goodSittingPlaces get() = finishingReindeer.flatMap { it.touchedFrom(start) }.distinct().count()
+
+  data class Reindeer(
+    val position: Position,
+    val direction: Direction = Direction.Right,
+    val score: Int = 0,
+    val turnPositions: List<Position> = emptyList(),
+  ) : SearchStateWithKey<PositionWithDirection> {
+    override val key: PositionWithDirection = position towards direction
+    override val cost: Int = score
+
+    fun touchedFrom(start: Position) = (sequenceOf(start) + turnPositions).windowed(2).flatMap { (a, b) ->
+      Position.between(a, b)
+    }.toSet()
+  }
 }
 
 fun String.asDijkstraMaze(): DijkstraMaze {

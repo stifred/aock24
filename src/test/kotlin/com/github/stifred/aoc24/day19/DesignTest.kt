@@ -23,4 +23,15 @@ class DesignTest {
 
     assertTrue { design.possibleCombos(patterns) > 0 }
   }
+
+  @Test
+  fun `stringy quirks`() {
+    repeat(10_000) {
+      val a = "ab"
+      val b = "ab"
+      assertTrue { a === b }
+      assertFalse { ("" + a) === ("" + b) }
+      assertFalse { a.substring(1) === b.substring(1) }
+    }
+  }
 }

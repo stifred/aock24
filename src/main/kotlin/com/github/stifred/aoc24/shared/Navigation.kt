@@ -1,8 +1,11 @@
 package com.github.stifred.aoc24.shared
 
+import com.github.stifred.aoc24.shared.search.SearchState
+import kotlin.math.abs
 
-data class Position(val x: Int, val y: Int) {
-  fun move(dir: Direction) = copy(x = x + dir.x, y = y + dir.y)
+
+data class Position(val x: Int, val y: Int) : SearchState {
+  fun move(dir: Direction) = this + dir.asPosition
 
   fun move(dir: Direction, width: Int, height: Int) =
     move(dir).takeIf { it.x in (0 until width) && it.y in (0 until height) }
@@ -10,6 +13,8 @@ data class Position(val x: Int, val y: Int) {
   fun isWithin(topLeft: Position, rightBottom: Position): Boolean {
     return x in (topLeft.x..rightBottom.x) && y in (topLeft.y..rightBottom.y)
   }
+
+  infix fun manhattanTo(other: Position) = abs(x - other.x) + abs(y - other.y)
 
   operator fun minus(other: Position) = Position(x = x - other.x, y = y - other.y)
   operator fun plus(other: Position) = Position(x = x + other.x, y = y + other.y)
@@ -20,11 +25,34 @@ data class Position(val x: Int, val y: Int) {
     y == other.y -> x in (other.x - 1)..(other.x + 1)
     else -> false
   }
+
+  companion object {
+    fun between(a: Position, b: Position, alt: Boolean = false) = buildSet {
+      var current = a
+      add(current)
+      if (alt) {
+        while (current.x != b.x) {
+          current = if (current.x < b.x) current.copy(x = current.x + 1) else current.copy(x = current.x - 1)
+          add(current)
+        }
+      }
+      while (current.y != b.y) {
+        current = if (current.y < b.y) current.copy(y = current.y + 1) else current.copy(y = current.y - 1)
+        add(current)
+      }
+      if (!alt) {
+        while (current.x != b.x) {
+          current = if (current.x < b.x) current.copy(x = current.x + 1) else current.copy(x = current.x - 1)
+          add(current)
+        }
+      }
+    }
+  }
+
+  override fun toString(): String = "$x,$y"
 }
 
 data class LongPosition(val x: Long, val y: Long) {
-  fun move(dir: Direction) = copy(x = x + dir.x, y = y + dir.y)
-
   operator fun minus(other: LongPosition) = LongPosition(x = x - other.x, y = y - other.y)
   operator fun plus(other: LongPosition) = LongPosition(x = x + other.x, y = y + other.y)
   operator fun times(long: Long) = LongPosition(x = long * x, y = long * y)
@@ -77,6 +105,8 @@ enum class Direction(val x: Int, val y: Int) {
   fun isHorizontal() = this in horizontals
   fun isVertical() = this in verticals
 
+  val asPosition = Position(x, y)
+
   private fun change(diff: Int): Direction {
     val index = entries.indexOf(this) + diff
     val size = entries.size
@@ -126,7 +156,7 @@ fun Pair<Position, Direction>.parallels(word: String, width: Int, height: Int): 
 
 fun String.asPosition() = split(',').let { (x, y) -> Position(x.toInt(), y.toInt()) }
 
-data class PositionWithDirection(val pos: Position, val dir: Direction) {
+data class PositionWithDirection(val pos: Position, val dir: Direction) : SearchState {
   companion object {
     infix fun Position.towards(dir: Direction) = PositionWithDirection(this, dir)
     infix fun Direction.at(pos: Position) = PositionWithDirection(pos, this)

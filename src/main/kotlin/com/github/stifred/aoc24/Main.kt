@@ -6,6 +6,7 @@ import com.github.stifred.aoc24.day16.day16
 import com.github.stifred.aoc24.day17.day17
 import com.github.stifred.aoc24.day18.day18
 import com.github.stifred.aoc24.day19.day19
+import com.github.stifred.aoc24.day20.day20
 import com.github.stifred.aoc24.eighth.eighth
 import com.github.stifred.aoc24.eleventh.eleventh
 import com.github.stifred.aoc24.fifth.fifth
@@ -40,6 +41,7 @@ private val days = listOf(
   day17,
   day18,
   day19,
+  day20,
 )
 
 fun main() {
