@@ -2,6 +2,10 @@ package com.github.stifred.aoc24.shared
 
 import java.io.File
 import java.io.FileOutputStream
+import java.net.URI
+import java.net.http.HttpClient
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse.BodyHandlers
 import java.time.Duration
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
@@ -11,10 +15,26 @@ fun solution(day: Int, func: SolutionDsl.() -> Unit): Solution {
   val sol = SolutionDsl(day)
   sol.runner = func
 
-  val file = File("/tmp/day-${day}.txt")
+  val file = file(day)
   if (!file.exists()) {
-    sol.javaClass.getResourceAsStream("/day-$day.txt")?.readAllBytes()
-      ?.let { FileOutputStream(file).write(it) }
+    var resource = sol.javaClass.getResourceAsStream("/day-$day.txt")
+
+    if (resource == null) {
+      println("Downloading input for day $day...")
+      val client = HttpClient.newHttpClient()
+      val request = HttpRequest.newBuilder()
+        .header("Cookie", System.getenv("AOC_COOKIE"))
+        .GET()
+        .uri(URI.create("https://adventofcode.com/2024/day/$day/input"))
+        .build()
+      val response = client.send(request, BodyHandlers.ofInputStream())
+
+      resource = response.body()
+    }
+
+    if (resource != null) {
+      FileOutputStream(file).write(resource.readAllBytes())
+    }
   }
 
   return Solution(day, sol)
@@ -53,9 +73,10 @@ class SolutionDsl(private val day: Int) {
   fun <T> parseInput(timed: Boolean = true, parser: (String) -> T): T {
     println(" ")
 
-    val text = javaClass.getResourceAsStream("/day-$day.txt")!!
-      .readAllBytes()
-      .toString(Charsets.UTF_8)
+    val text = javaClass.getResourceAsStream("/day-$day.txt")
+      ?.readAllBytes()
+      ?.toString(Charsets.US_ASCII)
+      ?: file(day).readText(Charsets.US_ASCII)
 
     val before = System.nanoTime()
     val ret = parser(text)
@@ -116,4 +137,11 @@ class SolutionDsl(private val day: Int) {
     this > Duration.ofNanos(10_000) -> "${toNanos() / 1000} µs"
     else -> "${toNanos()} ns"
   }
+}
+
+private fun file(day: Int): File {
+  val tmp = System.getenv("TEMP") ?: "/tmp"
+  val sep = if (tmp.contains('\\')) "\\" else "/"
+
+  return File("$tmp${sep}day-${day}.txt")
 }

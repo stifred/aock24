@@ -1,5 +1,6 @@
 package com.github.stifred.aoc24.shared.search
 
+import java.awt.BasicStroke
 import kotlin.reflect.KClass
 
 class Search<S : SearchState>(
