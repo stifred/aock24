@@ -17,7 +17,7 @@ class SecretNumberTest {
 
   @Test
   fun `sequence of numbers`() {
-    val expected = listOf<Long>(
+    val expected = listOf<SecretNumber>(
       15887950,
       16495136,
       527345,
@@ -29,7 +29,7 @@ class SecretNumberTest {
       7753432,
       5908254,
     )
-    val actual = 123L.sequence().take(10).toList()
+    val actual = 123L.sequence().drop(1).take(10).toList()
 
     assertEquals(expected, actual)
   }
