@@ -38,9 +38,11 @@ fun SecretNumber.sequence(): Sequence<SecretNumber> =
   (0 until 2000).asSequence().runningFold(this) { acc, _ -> acc.next() }
 
 fun SecretNumber.next(): SecretNumber {
-  val step1 = (this xor (this * 64)) % 16_777_216
-  val step2 = (step1 xor (step1 / 32) % 16_777_216)
-  return (step2 xor (step2 * 2048) % 16_777_216)
+  val step1 = (this xor (this shl 6)) and MASK
+  val step2 = (step1 xor (step1 shr 5) and MASK)
+  return (step2 xor (step2 shl 11) and MASK)
 }
+
+private const val MASK = 16_777_215L
 
 fun String.asSecretNumbers(): List<SecretNumber> = lines().filter(String::isNotBlank).map(String::toLong)
