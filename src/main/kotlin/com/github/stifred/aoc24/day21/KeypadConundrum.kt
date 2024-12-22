@@ -45,6 +45,7 @@ class Keypad private constructor(
 ) {
   fun Button.position() = buttons.indexOf(this).let { i -> Position(x = i % width, y = i / width) }
   private fun positionOf(button: Button) = button.position()
+  private val pathCache = MemoizationCache<ButtonCombo, List<Button>>()
 
   private fun paths(from: Button, to: Button): List<List<Button>> {
     val fromPos = from.position()
@@ -69,11 +70,11 @@ class Keypad private constructor(
     }
   }
 
-  fun movementBetween(from: Button, to: Button): List<Button> {
+  fun movementBetween(from: Button, to: Button): List<Button> = pathCache.runMemoized(ButtonCombo(from, to)) {
     val sequences = paths(from, to)
 
     val aPos = Directional.positionOf(Button.Activate)
-    return sequences.maxBy { seq ->
+    sequences.maxBy { seq ->
       seq.firstOrNull()?.let { Directional.positionOf(it) }?.manhattanTo(aPos) ?: 0
     }
   }

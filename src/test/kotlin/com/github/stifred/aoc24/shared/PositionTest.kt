@@ -19,7 +19,7 @@ class PositionTest {
     assertEquals(expectedVertical, actualVertical)
 
     val expectedBanana = setOf(Position(12, 10), Position(11, 10), Position(10, 10), Position(10, 11), Position(10, 12))
-    val actualBanana = Position.between(topRight, bottomLeft)
+    val actualBanana = Position.between(topRight, bottomLeft, alt = true)
     assertEquals(expectedBanana, actualBanana)
   }
 

@@ -8,14 +8,10 @@ sealed interface SeenSpace<S : SearchState> {
 
 @Suppress("UNCHECKED_CAST", "FunctionName")
 fun <S : SearchState> NoSeenSpace() = NoSeenSpace as SeenSpace<S>
-private data object NoSeenSpace : SeenSpace<NoSeenSpace.BogusSearchState> {
+private data object NoSeenSpace : SeenSpace<SearchState> {
   override fun reset() = Unit
-  override fun hasSeen(state: BogusSearchState): Boolean = false
-  override fun tryMarkSeen(state: BogusSearchState): Boolean = true
-
-  object BogusSearchState : SearchState {
-    override val cost: Int get() = 0
-  }
+  override fun hasSeen(state: SearchState): Boolean = false
+  override fun tryMarkSeen(state: SearchState): Boolean = true
 }
 
 class SetMapSeenSpace<S : SearchState> : SeenSpace<S> {
