@@ -9,6 +9,9 @@ import com.github.stifred.aoc24.day19.day19
 import com.github.stifred.aoc24.day20.day20
 import com.github.stifred.aoc24.day21.keypadConundrum
 import com.github.stifred.aoc24.day22.monkeyMarket
+import com.github.stifred.aoc24.day23.lanParty
+import com.github.stifred.aoc24.day24.crossedWires
+import com.github.stifred.aoc24.day25.codeChronicle
 import com.github.stifred.aoc24.eighth.eighth
 import com.github.stifred.aoc24.eleventh.eleventh
 import com.github.stifred.aoc24.fifth.fifth
@@ -17,6 +20,7 @@ import com.github.stifred.aoc24.fourth.fourth
 import com.github.stifred.aoc24.ninth.ninth
 import com.github.stifred.aoc24.second.second
 import com.github.stifred.aoc24.seventh.seventh
+import com.github.stifred.aoc24.shared.Solution
 import com.github.stifred.aoc24.sixth.sixth
 import com.github.stifred.aoc24.tenth.tenth
 import com.github.stifred.aoc24.third.third
@@ -46,14 +50,17 @@ private val days = listOf(
   day20,
   keypadConundrum,
   monkeyMarket,
+  lanParty,
+  crossedWires,
+  codeChronicle,
 )
 
-fun main() {
-  val last = days.maxBy { it.day }
+fun lastDay(day: Int? = null) = days
+  .filter { day == null || it.day == day }
+  .maxBy { it.day }
 
-  last.run(
-    runFirst = true,
-    runSecond = true,
-    runBenchmark = false,
-  )
-}
+fun main() = lastDay(24).run(
+  runFirst = true,
+  runSecond = true,
+  runBenchmark = false,
+)

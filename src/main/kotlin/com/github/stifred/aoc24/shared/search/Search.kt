@@ -42,11 +42,11 @@ class Search<S : SearchState>(
       try {
         func(order.next())
       } catch (s: Skipped) {
-        continue
-      } finally {
-        if (findlings.isNotEmpty()) {
-          return findlings.removeFirst()
-        }
+        // Nothing
+      }
+
+      if (findlings.isNotEmpty()) {
+        return findlings.removeFirst()
       }
     }
 

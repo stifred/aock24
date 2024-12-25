@@ -39,7 +39,7 @@ fun SecretNumber.sequence(): Sequence<SecretNumber> =
 
 fun SecretNumber.next(): SecretNumber {
   val step1 = (this xor (this shl 6)) and MASK
-  val step2 = (step1 xor (step1 shr 5) and MASK)
+  val step2 = (step1 xor (step1 ushr 5))
   return (step2 xor (step2 shl 11) and MASK)
 }
 

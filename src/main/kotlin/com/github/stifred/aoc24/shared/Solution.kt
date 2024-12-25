@@ -79,7 +79,7 @@ class SolutionDsl(private val day: Int) {
       ?: file(day).readText(Charsets.US_ASCII)
 
     val before = System.nanoTime()
-    val ret = parser(text)
+    val ret = parser(text.trimEnd('\n'))
     val after = System.nanoTime()
 
     if (timed) {
