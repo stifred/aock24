@@ -78,8 +78,10 @@ class SolutionDsl(private val day: Int) {
       ?.toString(Charsets.US_ASCII)
       ?: file(day).readText(Charsets.US_ASCII)
 
+    val fixed = text.trimEnd('\n')
+
     val before = System.nanoTime()
-    val ret = parser(text.trimEnd('\n'))
+    val ret = parser(fixed)
     val after = System.nanoTime()
 
     if (timed) {
@@ -90,7 +92,7 @@ class SolutionDsl(private val day: Int) {
         val reps = duration.repeatCount()
         println("Parse BM reps:  $reps")
         val bmBefore = System.nanoTime()
-        repeat(reps) { parser(text) }
+        repeat(reps) { parser(fixed) }
         val bmAfter = System.nanoTime()
         println("Parse BM time:  ${Duration.ofNanos((bmAfter - bmBefore) / reps).prettyPrint()}")
       }

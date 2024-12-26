@@ -59,7 +59,7 @@ fun lastDay(day: Int? = null) = days
   .filter { day == null || it.day == day }
   .maxBy { it.day }
 
-fun main() = lastDay(24).run(
+fun main() = lastDay().run(
   runFirst = true,
   runSecond = true,
   runBenchmark = false,
